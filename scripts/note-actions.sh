@@ -7,7 +7,10 @@
 
 set -euo pipefail
 
-NOTES_DIR="notes"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+NOTES_DIR="$REPO_DIR/notes"
 FILTER_OWNER=""
 FILTER_OVERDUE=false
 FILTER_PRIORITY=""
@@ -124,7 +127,7 @@ while IFS= read -r f; do
     [[ -z "$priority" || "$priority" == "—" ]] && priority="Medium"
 
     urgency=$(urgency_marker "$due")
-    note_ref="[${title}](${f#notes/}) (${note_date})"
+    note_ref="[${title}](${f#$NOTES_DIR/}) (${note_date})"
 
     # Build formatted line
     prefix=""

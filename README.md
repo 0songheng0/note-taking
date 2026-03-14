@@ -40,19 +40,29 @@ Claude will ask for a type, a title, and your content — then save, index, and 
 
 **Prerequisites:** [git](https://git-scm.com/) and [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed.
 
+### Local (use from within the repo)
+
 ```bash
-# 1. Clone the repository
 git clone https://github.com/0songheng0/note-taking.git
 cd note-taking
-
-# 2. Make the scripts executable
 chmod +x scripts/*.sh
-
-# 3. Open Claude Code in the project
 claude .
 ```
 
-That's it — no dependencies to install, no database, no config files. Run `/note` to capture your first note.
+No dependencies, no config. Run `/note` to capture your first note.
+
+### Global (use `/note` from any directory)
+
+```bash
+git clone https://github.com/0songheng0/note-taking.git
+cd note-taking
+chmod +x scripts/*.sh install.sh
+./install.sh
+```
+
+This copies all 15 commands to `~/.claude/commands/` with absolute paths wired in. Open `claude` from **any directory** and `/note`, `/note-search`, `/note-actions`, and all other commands are available. Notes are always saved to the cloned repo's `notes/` folder regardless of where you run Claude.
+
+To update after pulling new changes, re-run `./install.sh` — it overwrites the installed commands in place.
 
 ---
 

@@ -5,7 +5,10 @@
 
 set -euo pipefail
 
-NOTES_DIR="notes"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+NOTES_DIR="$REPO_DIR/notes"
 DAYS=7
 FROM_DATE=""
 TO_DATE=$(date +%Y-%m-%d)
@@ -97,7 +100,7 @@ for type in meeting minutes discussion instruction quick; do
     title=$(parse_field "title" "$f")
     date=$(parse_field "date" "$f")
     [[ -z "$title" ]] && title=$(basename "$f" .md)
-    echo "- **${date}** [${title}](${f#notes/})"
+    echo "- **${date}** [${title}](${f#$NOTES_DIR/})"
   done
   echo ""
 done

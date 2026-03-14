@@ -9,7 +9,10 @@
 
 set -euo pipefail
 
-NOTES_DIR="notes"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+NOTES_DIR="$REPO_DIR/notes"
 QUERY=""
 FILTER_TYPE=""
 FILTER_AFTER=""
@@ -106,7 +109,7 @@ for f in "${RESULTS[@]}"; do
     tag_str=$(echo "$tags" | tr -d '[]' | sed 's/,/ /g' | xargs -n1 printf '`%s` ')
   fi
 
-  echo "### [${title}](${f#notes/})"
+  echo "### [${title}](${f#$NOTES_DIR/})"
   echo "> ${date} · ${type:-unknown} ${tag_str}"
   echo ""
 

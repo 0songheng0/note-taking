@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
 TYPE="${1:-quick}"
 TITLE="${2:-untitled}"
 DATE="${3:-$(date +%Y-%m-%d)}"
@@ -27,9 +30,9 @@ SLUG=$(echo "$TITLE" \
   | sed 's/^-//;s/-$//')
 
 FILENAME="${DATE}-${SLUG}.md"
-OUTPUT_PATH="notes/${FOLDER}/${FILENAME}"
+OUTPUT_PATH="$REPO_DIR/notes/${FOLDER}/${FILENAME}"
 
 # Ensure directory exists
-mkdir -p "notes/${FOLDER}"
+mkdir -p "$REPO_DIR/notes/${FOLDER}"
 
 echo "$OUTPUT_PATH"

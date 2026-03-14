@@ -5,7 +5,10 @@
 
 set -euo pipefail
 
-NOTES_DIR="notes"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+NOTES_DIR="$REPO_DIR/notes"
 SORT_MODE="count"  # count | alpha
 
 while [[ $# -gt 0 ]]; do

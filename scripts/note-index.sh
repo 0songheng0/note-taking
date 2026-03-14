@@ -5,8 +5,11 @@
 
 set -euo pipefail
 
-NOTES_DIR="notes"
-INDEX_FILE="notes/INDEX.md"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+NOTES_DIR="$REPO_DIR/notes"
+INDEX_FILE="$REPO_DIR/notes/INDEX.md"
 
 # Collect all note files sorted by filename descending (newest first)
 mapfile -t FILES < <(find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r)
@@ -29,7 +32,7 @@ note_link() {
   title=$(parse_field "title" "$file")
   date=$(parse_field "date" "$file")
   tags=$(parse_field "tags" "$file")
-  rel_path="${file#notes/}"  # strip leading "notes/"
+  rel_path="${file#$NOTES_DIR/}"  # strip leading notes dir prefix
 
   # Format tags as inline chips if present
   local tag_str=""

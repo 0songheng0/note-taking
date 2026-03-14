@@ -5,7 +5,10 @@
 
 set -euo pipefail
 
-NOTES_DIR="notes"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+NOTES_DIR="$REPO_DIR/notes"
 NAME="${1:-}"
 
 if [[ -z "$NAME" ]]; then
@@ -127,7 +130,7 @@ if [[ ${#MEETINGS[@]} -gt 0 ]]; then
   echo ""
   for entry in "${MEETINGS[@]}"; do
     IFS='|' read -r d t p <<< "$entry"
-    echo "- **${d}** [${t}](${p#notes/})"
+    echo "- **${d}** [${t}](${p#$NOTES_DIR/})"
   done
   echo ""
 else
@@ -145,7 +148,7 @@ for entry in "${ACTION_ITEMS[@]:-}"; do
   urgency=$(urgency_marker "$due")
   prefix=""
   [[ -n "$urgency" ]] && prefix="**${urgency}** — "
-  note_ref="[${title}](${path#notes/}) (${note_date})"
+  note_ref="[${title}](${path#$NOTES_DIR/}) (${note_date})"
   line="- [ ] ${prefix}**[${priority}]** ${action} — due: ${due:-TBD} — ${note_ref}"
   echo "$status" | grep -qiE "^done$" && DONE_ACTIONS+=("$line") || OPEN_ACTIONS+=("$line")
 done
@@ -174,7 +177,7 @@ if [[ ${#MENTIONS[@]} -gt 0 ]]; then
   echo ""
   for entry in "${MENTIONS[@]}"; do
     IFS='|' read -r d t p <<< "$entry"
-    echo "- **${d}** [${t}](${p#notes/})"
+    echo "- **${d}** [${t}](${p#$NOTES_DIR/})"
   done
   echo ""
 fi
