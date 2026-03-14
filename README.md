@@ -36,6 +36,26 @@ Claude will ask for a type, a title, and your content — then save, index, and 
 
 ---
 
+## Installation
+
+**Prerequisites:** [git](https://git-scm.com/) and [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/0songheng0/note-taking.git
+cd note-taking
+
+# 2. Make the scripts executable
+chmod +x scripts/*.sh
+
+# 3. Open Claude Code in the project
+claude .
+```
+
+That's it — no dependencies to install, no database, no config files. Run `/note` to capture your first note.
+
+---
+
 ## The 11 Skills
 
 Skills are organized into three groups by intent.
