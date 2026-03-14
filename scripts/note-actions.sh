@@ -49,7 +49,7 @@ urgency_marker() {
     cutoff=$(date -d "${TODAY} +3 days" +%Y-%m-%d 2>/dev/null \
       || python3 -c "from datetime import date,timedelta; print(date.fromisoformat('${TODAY}')+timedelta(days=3))" 2>/dev/null \
       || echo "")
-    [[ -n "$cutoff" && "$due_norm" <= "$cutoff" ]] && echo "→ DUE SOON" || true
+    [[ -n "$cutoff" && ! "$due_norm" > "$cutoff" ]] && echo "→ DUE SOON" || true
   fi
 }
 
@@ -66,6 +66,9 @@ status_rank() {
 # Each entry: "srank|prank|owner|formatted_line"
 ALL_LINES=()
 
+_tmp_notes=$(mktemp)
+find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort > "$_tmp_notes"
+
 while IFS= read -r f; do
   type=$(parse_field "type" "$f")
   title=$(parse_field "title" "$f")
@@ -73,6 +76,9 @@ while IFS= read -r f; do
   [[ -z "$title" ]] && title=$(basename "$f" .md)
 
   [[ "$type" == "meeting" || "$type" == "minutes" || "$type" == "discussion" ]] || continue
+
+  _tmp_rows=$(mktemp)
+  grep -P '^\s*\|' "$f" > "$_tmp_rows" 2>/dev/null || true
 
   while IFS= read -r row; do
     # Skip separator and header rows
@@ -120,7 +126,7 @@ while IFS= read -r f; do
 
     if [[ "$FILTER_OVERDUE" == true ]]; then
       due_norm=$(normalize_date "$due")
-      { [[ -z "$due_norm" ]] || [[ "$due_norm" >= "$TODAY" ]]; } && continue
+      { [[ -z "$due_norm" ]] || [[ ! "$due_norm" < "$TODAY" ]]; } && continue
     fi
 
     [[ -z "$owner"    || "$owner"    == "—" ]] && owner="Unassigned"
@@ -140,9 +146,11 @@ while IFS= read -r f; do
     # Use a safe separator that won't appear in paths/titles
     ALL_LINES+=("${srank}${CHAR_SEP:-|}${prank}${CHAR_SEP:-|}${owner}${CHAR_SEP:-|}${line}")
 
-  done < <(grep -P '^\s*\|' "$f" 2>/dev/null || true)
+  done < "$_tmp_rows"
+  rm -f "$_tmp_rows"
 
-done < <(find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort)
+done < "$_tmp_notes"
+rm -f "$_tmp_notes"
 
 # ---- output -------------------------------------------------------------------
 
@@ -162,7 +170,10 @@ echo "> Legend: ⚠ OVERDUE · → DUE SOON · Priority shown as [High/Medium/Lo
 echo ""
 
 # Sort: status rank asc, priority rank asc, owner alpha
-mapfile -t SORTED_LINES < <(printf '%s\n' "${ALL_LINES[@]}" | sort -t'|' -k1,1n -k2,2n -k3,3)
+_tmp_sorted=$(mktemp)
+printf '%s\n' "${ALL_LINES[@]}" | sort -t'|' -k1,1n -k2,2n -k3,3 > "$_tmp_sorted"
+mapfile -t SORTED_LINES < "$_tmp_sorted"
+rm -f "$_tmp_sorted"
 
 declare -A STATUS_LABELS=( [1]="Blocked" [2]="In Progress" [3]="Open" )
 current_srank=""

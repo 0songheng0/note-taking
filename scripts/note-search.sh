@@ -40,7 +40,10 @@ parse_field() {
 
 # ---- collect candidates -----------------------------------------------------
 
-mapfile -t ALL_FILES < <(find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r)
+_tmp_files=$(mktemp)
+find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r > "$_tmp_files"
+mapfile -t ALL_FILES < "$_tmp_files"
+rm -f "$_tmp_files"
 
 RESULTS=()
 

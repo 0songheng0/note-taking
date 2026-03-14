@@ -20,6 +20,9 @@ done
 
 declare -A TAG_COUNTS
 
+_tmp_notes=$(mktemp)
+find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort > "$_tmp_notes"
+
 while IFS= read -r f; do
   # Extract the tags line from YAML frontmatter
   tags_line=$(awk '
@@ -44,7 +47,8 @@ while IFS= read -r f; do
       TAG_COUNTS[$tag]=1
     fi
   done
-done < <(find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" 2>/dev/null)
+done < "$_tmp_notes"
+rm -f "$_tmp_notes"
 
 if [[ ${#TAG_COUNTS[@]} -eq 0 ]]; then
   echo "No tags found. Add tags to your notes' YAML frontmatter to get started."
@@ -62,15 +66,17 @@ else
   sort_cmd="sort -t'|' -k1,1rn -k2,2"
 fi
 
+_tmp_sorted=$(mktemp)
+for tag in "${!TAG_COUNTS[@]}"; do
+  printf '%s|%s\n' "${TAG_COUNTS[$tag]}" "$tag"
+done | eval "$sort_cmd" > "$_tmp_sorted"
+
 while IFS= read -r line; do
   count="${line%%|*}"
   tag="${line#*|}"
   printf "| %5s | %s |\n" "$count" "$tag"
-done < <(
-  for tag in "${!TAG_COUNTS[@]}"; do
-    printf '%s|%s\n' "${TAG_COUNTS[$tag]}" "$tag"
-  done | eval "$sort_cmd"
-)
+done < "$_tmp_sorted"
+rm -f "$_tmp_sorted"
 
 echo ""
 echo "*${#TAG_COUNTS[@]} unique tag(s) across all notes*"

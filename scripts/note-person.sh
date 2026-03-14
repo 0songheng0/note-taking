@@ -38,7 +38,7 @@ urgency_marker() {
     cutoff=$(date -d "${TODAY} +3 days" +%Y-%m-%d 2>/dev/null \
       || python3 -c "from datetime import date,timedelta; print(date.fromisoformat('${TODAY}')+timedelta(days=3))" 2>/dev/null \
       || echo "")
-    [[ -n "$cutoff" && "$due_norm" <= "$cutoff" ]] && echo "→ DUE SOON" || true
+    [[ -n "$cutoff" && ! "$due_norm" > "$cutoff" ]] && echo "→ DUE SOON" || true
   fi
 }
 
@@ -47,6 +47,9 @@ urgency_marker() {
 MEETINGS=()       # "date|title|path"
 ACTION_ITEMS=()   # "due|priority|action|title|path"
 MENTIONS=()       # "date|title|path"
+
+_tmp_notes=$(mktemp)
+find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r > "$_tmp_notes"
 
 while IFS= read -r f; do
   type=$(parse_field "type" "$f")
@@ -62,6 +65,8 @@ while IFS= read -r f; do
 
   # 2. Scan action item tables for this person as owner
   if [[ "$type" == "meeting" || "$type" == "minutes" || "$type" == "discussion" ]]; then
+    _tmp_person_rows=$(mktemp)
+    grep -P '^\s*\|' "$f" > "$_tmp_person_rows" 2>/dev/null || true
     while IFS= read -r row; do
       [[ "$row" =~ ^[[:space:]]*\|[[:space:]]*[-:] ]] && continue
       [[ "$row" =~ \|[[:space:]]*(Action|Follow-up|#)[[:space:]]*\| ]] && continue
@@ -102,7 +107,8 @@ while IFS= read -r f; do
       [[ -z "$status"   || "$status"   == "—" ]] && status="Open"
 
       ACTION_ITEMS+=("${due:-}|${priority}|${action}|${title}|${f}|${status}|${note_date}")
-    done < <(grep -P '^\s*\|' "$f" 2>/dev/null || true)
+    done < "$_tmp_person_rows"
+    rm -f "$_tmp_person_rows"
   fi
 
   # 3. Check body text mentions (outside frontmatter)
@@ -117,7 +123,8 @@ while IFS= read -r f; do
     fi
   fi
 
-done < <(find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r)
+done < "$_tmp_notes"
+rm -f "$_tmp_notes"
 
 # ---- output -------------------------------------------------------------------
 

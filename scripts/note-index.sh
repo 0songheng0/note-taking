@@ -12,7 +12,10 @@ NOTES_DIR="$REPO_DIR/notes"
 INDEX_FILE="$REPO_DIR/notes/INDEX.md"
 
 # Collect all note files sorted by filename descending (newest first)
-mapfile -t FILES < <(find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r)
+_tmp_files=$(mktemp)
+find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r > "$_tmp_files"
+mapfile -t FILES < "$_tmp_files"
+rm -f "$_tmp_files"
 
 TOTAL=${#FILES[@]}
 
@@ -82,10 +85,10 @@ done
 # ---- count open actions -----------------------------------------------------
 
 OPEN_ACTIONS=0
-while IFS= read -r f; do
+for f in "${FILES[@]}"; do
   count=$(grep -cP '\|\s.*\|\s.*\|\s.*Open' "$f" 2>/dev/null || true)
   OPEN_ACTIONS=$((OPEN_ACTIONS + count))
-done < <(printf '%s\n' "${FILES[@]}")
+done
 
 # ---- write INDEX.md ---------------------------------------------------------
 

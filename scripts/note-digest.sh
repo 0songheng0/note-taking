@@ -49,11 +49,14 @@ urgency_marker() {
     cutoff=$(date -d "${TODAY} +3 days" +%Y-%m-%d 2>/dev/null \
       || python3 -c "from datetime import date,timedelta; print(date.fromisoformat('${TODAY}')+timedelta(days=3))" 2>/dev/null \
       || echo "")
-    [[ -n "$cutoff" && "$due_norm" <= "$cutoff" ]] && echo "→ DUE SOON" || true
+    [[ -n "$cutoff" && ! "$due_norm" > "$cutoff" ]] && echo "→ DUE SOON" || true
   fi
 }
 
-mapfile -t ALL_FILES < <(find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r)
+_tmp_files=$(mktemp)
+find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r > "$_tmp_files"
+mapfile -t ALL_FILES < "$_tmp_files"
+rm -f "$_tmp_files"
 
 MATCHED_FILES=()
 for f in "${ALL_FILES[@]}"; do
@@ -117,6 +120,8 @@ for f in "${MATCHED_FILES[@]}"; do
   title=$(parse_field "title" "$f")
   date=$(parse_field "date" "$f")
 
+  _tmp_rows=$(mktemp)
+  grep -P '^\s*\|' "$f" > "$_tmp_rows" 2>/dev/null || true
   while IFS= read -r row; do
     [[ "$row" =~ Action.*Owner ]] && continue
     [[ "$row" =~ ^[[:space:]]*\|[[:space:]]*[-:] ]] && continue
@@ -141,7 +146,8 @@ for f in "${MATCHED_FILES[@]}"; do
     [[ -n "$urgency" ]] && prefix="**${urgency}** — "
     echo "- [ ] ${prefix}**${action}** — ${owner:-Unassigned} — due: ${due:-TBD} *(from: ${title}, ${date})*"
     OPEN_COUNT=$((OPEN_COUNT + 1))
-  done < <(grep -P '^\s*\|' "$f" 2>/dev/null || true)
+  done < "$_tmp_rows"
+  rm -f "$_tmp_rows"
 done
 
 [[ $OPEN_COUNT -eq 0 ]] && echo "No open actions in this period."

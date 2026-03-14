@@ -25,7 +25,10 @@ parse_field() {
 }
 
 # Find all candidate notes (newest first)
-mapfile -t FILES < <(find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r)
+_tmp_files=$(mktemp)
+find "$NOTES_DIR" -name "*.md" ! -name ".gitkeep" ! -name "INDEX.md" | sort -r > "$_tmp_files"
+mapfile -t FILES < "$_tmp_files"
+rm -f "$_tmp_files"
 
 MATCH=""
 for f in "${FILES[@]}"; do
