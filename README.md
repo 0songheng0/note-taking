@@ -66,9 +66,9 @@ To update after pulling new changes, re-run `./install.sh` — it overwrites the
 
 ---
 
-## The 11 Skills
+## The 15 Skills
 
-Skills are organized into three groups by intent.
+Skills are organized into four groups by intent.
 
 ---
 
@@ -79,12 +79,14 @@ Skills are organized into three groups by intent.
 | `/note` | Guided note capture. Claude asks type → title → content, auto-detects type from your content, structures it into a template, saves, and commits. |
 | `/note-agent` | Zero-question mode. Paste a raw transcript, email thread, or Slack dump. Claude reads it, infers everything — type, attendees, decisions, actions — and saves without asking. |
 | `/note-followup` | Continue a recurring meeting. Finds the previous note by topic, pre-fills today's note with its open action items, then merges in your new content. |
+| `/note-standup` | Fast daily standup capture with three sections: Yesterday / Today / Blockers. Auto-fills Yesterday from the previous standup note. |
 
 **Capture tips:**
 
 - Use `/note` when you want to stay in control of the structure.
 - Use `/note-agent` when you have a messy block of text you don't want to clean up yourself.
 - Use `/note-followup` for anything recurring: standups, 1:1s, sprint reviews, weekly syncs.
+- Use `/note-standup` for daily standups — it pre-fills Yesterday from the previous standup automatically.
 
 ---
 
@@ -95,6 +97,8 @@ Skills are organized into three groups by intent.
 | `/note-search` | Full-text search with filters. Find notes by keyword, type, date range, or tag. |
 | `/note-actions` | Surface all open action items across every saved note, grouped by owner. Filter by person or overdue status. |
 | `/note-digest` | Generate a dated summary of notes — total count, grouped by type with links, consolidated open actions. Optionally save as a quick note. |
+| `/note-tags` | List all tags used across your notes sorted by frequency. Helps maintain tag consistency. |
+| `/note-person` | Person-centric view — every meeting someone attended, every action assigned to them, every note that mentions them. |
 
 **Search filter syntax:**
 
@@ -123,6 +127,32 @@ Skills are organized into three groups by intent.
 ```
 
 > `notes/INDEX.md` is also auto-regenerated after every save — a browsable dashboard of all notes, grouped by type, sorted newest-first, with tags and open action counts at a glance.
+
+---
+
+### ✦ Visualise — see the big picture
+
+| Skill | What it does |
+|-------|-------------|
+| `/note-board` | Kanban-style view of action items grouped into columns: Blocked → In Progress → Open. Filter by owner, priority, or tag. |
+| `/note-project` | Project container view. Groups all notes sharing a tag into one view: timeline, key decisions, and all open actions. |
+
+**Board filters:**
+
+```
+/note-board                            ← all active action items
+/note-board --owner Alice              ← one person's board
+/note-board --priority high            ← only high-priority items
+/note-board --tag sprint               ← items from sprint-tagged notes only
+```
+
+**Project view:**
+
+```
+/note-project auth-redesign            ← all notes tagged auth-redesign
+/note-project --tag sprint-12          ← explicit tag filter
+/note-project payments --from 2026-03-01
+```
 
 ---
 
@@ -192,19 +222,30 @@ aMess/
 │   ├── note-search.sh                  ← full-text search with filters
 │   ├── note-actions.sh                 ← extracts open action items
 │   ├── note-followup.sh                ← finds previous note and its open actions
-│   └── note-digest.sh                  ← summarises a date range of notes
+│   ├── note-digest.sh                  ← summarises a date range of notes
+│   ├── note-person.sh                  ← person-centric view across all notes
+│   └── note-tags.sh                    ← lists all tags used across notes
+│
+├── tests/
+│   └── run_tests.sh                    ← comprehensive simulation tests
 │
 └── .claude/
-    └── commands/                       ← Claude Code skill definitions
-        ├── note.md                     ← /note
-        ├── note-agent.md               ← /note-agent
-        ├── note-followup.md            ← /note-followup
+    ├── settings.json                   ← Claude Code plugin permissions
+    └── commands/                       ← Claude Code skill definitions (15 skills)
+        ├── note.md                     ← /note         (guided capture)
+        ├── note-agent.md               ← /note-agent   (zero-question capture)
+        ├── note-followup.md            ← /note-followup (recurring meetings)
+        ├── note-standup.md             ← /note-standup  (daily standup)
         ├── note-search.md              ← /note-search
         ├── note-actions.md             ← /note-actions
         ├── note-digest.md              ← /note-digest
+        ├── note-tags.md                ← /note-tags
+        ├── note-person.md              ← /note-person
+        ├── note-board.md               ← /note-board   (kanban view)
+        ├── note-project.md             ← /note-project (project view)
         ├── note-tasks.md               ← /note-tasks
         ├── note-feature.md             ← /note-feature
-        ├── note-skill.md               ← /note-skill
+        ├── note-skill.md               ← /note-skill   (generates new skills)
         └── note-brief.md               ← /note-brief
 ```
 

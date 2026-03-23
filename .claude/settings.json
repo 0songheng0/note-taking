@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash scripts/note-save.sh*)",
+      "Bash(bash scripts/note-index.sh*)",
+      "Bash(bash scripts/note-search.sh*)",
+      "Bash(bash scripts/note-actions.sh*)",
+      "Bash(bash scripts/note-followup.sh*)",
+      "Bash(bash scripts/note-digest.sh*)",
+      "Bash(bash scripts/note-person.sh*)",
+      "Bash(bash scripts/note-tags.sh*)",
+      "Bash(git add notes/)",
+      "Bash(git add .claude/commands/*)",
+      "Bash(git commit -m*)",
+      "Bash(git -C * add notes/)",
+      "Bash(git -C * add .claude/commands/*)",
+      "Bash(git -C * commit -m*)"
+    ]
+  }
+}
